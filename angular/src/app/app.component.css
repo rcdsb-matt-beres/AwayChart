@@ -1,0 +1,49 @@
+.grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 135px;
+}
+
+.name, .value {    
+  border: 1px solid black;
+  padding: 10px;
+  font-size: 28px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fafafa;
+}
+
+.name {
+    background-color: #f1f1f1;
+}
+
+.first-left {    
+    border-top-left-radius: 5px;
+}
+
+.first-right {    
+    border-top-right-radius: 5px;
+}
+
+.last-left {    
+    border-bottom-left-radius: 5px;
+}
+
+.last-right {    
+    border-bottom-right-radius: 5px;
+}
+
+.sick {
+    color: darkgreen;
+}
+.remote {
+    color: darkblue;
+}
+.conference {
+    color: darkgoldenrod;
+}
+.out {
+    color: darkred;
+}
