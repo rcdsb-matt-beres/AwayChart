@@ -24,8 +24,11 @@ export class AppComponent implements OnInit{
 
   itemizeEvents() {
     this.events.forEach(event => {
-      if (event.summary.split("-")[1].trim() == "Remote")
+      if (event.summary.split("-")[1].trim() == "Remote") {
         this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote")
+      } else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote"){
+        this.remoteMap.set("Corey Graveline-Dumouchel", "Remote")
+      }
     })
   }
 
