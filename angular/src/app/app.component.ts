@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CalendarService } from './calendar.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { ClockComponent } from './clock/clock.component';
+import { GridComponent } from './grid/grid.component';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ClockComponent],
+  imports: [CommonModule, GridComponent, ClockComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
