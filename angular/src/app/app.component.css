@@ -1,48 +1,21 @@
-.grid {
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
+button {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    margin: 25px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    font-size: 32pt;
+    background-color: #fafafa;
+    border: 2px solid #666666;
 }
 
-.name, .value {    
-  border: 1px solid black;
-  padding: 10px;
-  font-size: 28px;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: rgba(250,250,250, .6);
+button:hover {
+    background-color: #666666;
+    color: #fafafa;
+    cursor: pointer;
 }
-
-.name {
-    background-color: rgba(241,241,241, .6);
-}
-
-.first-left {    
-    border-top-left-radius: 5px;
-}
-
-.first-right {    
-    border-top-right-radius: 5px;
-}
-
-.last-left {    
-    border-bottom-left-radius: 5px;
-}
-
-.last-right {    
-    border-bottom-right-radius: 5px;
-}
-
-.sick {
-    color: darkgreen;
-}
-.remote {
-    color: darkblue;
-}
-.conference {
-    color: darkgoldenrod;
-}
-.out {
-    color: darkred;
+button:focus {
+    outline: none;
 }
