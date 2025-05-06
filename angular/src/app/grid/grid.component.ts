@@ -31,6 +31,9 @@ export class GridComponent implements OnInit{
 
   events: any[] = [];
   remoteMap = new Map<String, String>();
+  awayMap = new Map<String, String>();
+
+  displayMap = new Map<String, String>();
 
   ngOnInit(): void {
     this.names.sort();
@@ -42,12 +45,33 @@ export class GridComponent implements OnInit{
 
   itemizeEvents() {
     this.events.forEach(event => {
+      //Remote
       if (event.summary.split("-")[1].trim() == "Remote") {
         this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote")
+        this.displayMap.set(event.summary.split("-")[0].trim(), "Remote")
       } //Account for Corey's hyphenated last name
       else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote"){
         this.remoteMap.set("Corey Graveline-Dumouchel", "Remote")
+        this.displayMap.set("Corey Graveline-Dumouchel", "Remote")
       }
+
+      //Out of Office
+      if (event.summary.split("-")[1].trim() == "Out of Office") {
+        this.awayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
+        if (this.displayMap.has(event.summary.split("-")[0].trim())) {
+          this.displayMap.delete(event.summary.split("-")[0].trim());
+        }
+        this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
+      } //Account for Corey's hyphenated last name
+      else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Out of Office"){
+        this.awayMap.set("Corey Graveline-Dumouchel", "Out of Office")
+        if (this.displayMap.has("Corey Graveline-Dumouchel")) {
+          this.displayMap.delete("Corey Graveline-Dumouchel");
+        }
+        this.displayMap.set("Corey Graveline-Dumouchel", "Out of Office")
+      }
+
+      
     })
   }
 

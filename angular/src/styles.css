@@ -4,4 +4,5 @@ html, body {
     margin: 0;
     background-image: url("../public/spring.webp");
     background-repeat: no-repeat;
+    background-size: 100% 100%;
   }
