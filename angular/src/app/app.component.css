@@ -1,3 +1,19 @@
+.spring {
+    background-image: url("../../public/spring.webp");
+}
+
+.summer {
+    background-image: url("../../public/summer.jpg");
+}
+
+.fall {
+    background-image: url("../../public/fall.jpg");
+}
+
+.winter {
+    background-image: url("../../public/winter.jpg");
+}
+
 button {
     position: fixed;
     bottom: 0px;
