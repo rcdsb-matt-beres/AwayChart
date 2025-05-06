@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CalendarService } from '../calendar.service';
 
 @Component({
   selector: 'app-add-event',
@@ -7,5 +8,8 @@ import { Component } from '@angular/core';
   styleUrl: './add-event.component.css'
 })
 export class AddEventComponent {
-
+constructor(private calendarService: CalendarService) {}
+  onClick() {
+    //Go to add event app
+  }
 }
