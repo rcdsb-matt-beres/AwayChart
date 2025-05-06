@@ -13,25 +13,3 @@
 .winter {
     background-image: url("../../public/winter.jpg");
 }
-
-button {
-    position: fixed;
-    bottom: 0px;
-    right: 0px;
-    margin: 25px;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    font-size: 32pt;
-    background-color: #fafafa;
-    border: 2px solid #666666;
-}
-
-button:hover {
-    background-color: #666666;
-    color: #fafafa;
-    cursor: pointer;
-}
-button:focus {
-    outline: none;
-}

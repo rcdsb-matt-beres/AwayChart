@@ -4,10 +4,11 @@ import { CommonModule, NgFor } from '@angular/common';
 import { ClockComponent } from './clock/clock.component';
 import { GridComponent } from './grid/grid.component';
 import { get } from 'http';
+import { AddEventComponent } from './add-event/add-event.component';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, GridComponent, ClockComponent],
+  imports: [CommonModule, GridComponent, ClockComponent, AddEventComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
