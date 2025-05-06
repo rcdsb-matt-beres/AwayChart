@@ -12,7 +12,7 @@ export class CalendarService {
   private apiUrl = 'https://www.googleapis.com/calendar/v3/calendars';
 
   start = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T00:00:00-04:00'
-  end = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T11:59:00-04:00'
+  end = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T23:59:00-04:00'
 
   constructor(private http: HttpClient) {}
 
