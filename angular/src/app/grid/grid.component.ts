@@ -9,8 +9,8 @@ import { interval, map, Subscription } from 'rxjs';
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.css'
 })
-export class GridComponent implements OnInit{
-  constructor(private calendarService: CalendarService) {}
+export class GridComponent implements OnInit {
+  constructor(private calendarService: CalendarService) { }
   private intervalSubscription?: Subscription;
 
   names = [
@@ -20,7 +20,7 @@ export class GridComponent implements OnInit{
     "Andrew Lebert",
     "Andrew Smith",
     "Anthony Walsh",
-    "Bethany McCulloh",
+    "Bethany McCulloch",
     "Brad Pilon",
     "Corey Graveline-Dumouchel",
     "David Priebe",
@@ -70,7 +70,7 @@ export class GridComponent implements OnInit{
   itemizeEvents() {
     this.events.forEach(event => {
       //Check timing
-      let shouldDisplay = true; 
+      let shouldDisplay = true;
       if (event.start.dateTime) {
         const currentDate = new Date();
         const startTime = new Date(event.start.dateTime)
@@ -86,7 +86,7 @@ export class GridComponent implements OnInit{
           this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote")
           this.displayMap.set(event.summary.split("-")[0].trim(), "Remote")
         } //Account for Corey's hyphenated last name
-        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote"){
+        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote") {
           this.remoteMap.set("Corey Graveline-Dumouchel", "Remote")
           this.displayMap.set("Corey Graveline-Dumouchel", "Remote")
         }
@@ -115,7 +115,7 @@ export class GridComponent implements OnInit{
           }
           this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
         } //Account for Corey's hyphenated last name
-        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Out of Office"){
+        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Out of Office") {
           this.awayMap.set("Corey Graveline-Dumouchel", "Out of Office")
           if (this.displayMap.get("Corey Graveline-Dumouchel") == "Remote" || this.displayMap.get("Corey Graveline-Dumouchel") == "Conference") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
@@ -131,14 +131,14 @@ export class GridComponent implements OnInit{
           }
           this.displayMap.set(event.summary.split("-")[0].trim(), "Field (" + event.summary.split("(")[1].trim());
         } //Account for Corey's hyphenated last name
-        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim().includes("Field")){
+        else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim().includes("Field")) {
           this.fieldMap.set("Corey Graveline-Dumouchel", "Field")
           if (this.displayMap.get("Corey Graveline-Dumouchel") == "Remote" || this.displayMap.get("Corey Graveline-Dumouchel") == "Conference" || this.displayMap.get("Corey Graveline-Dumouchel") == "Out of Office") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
           this.displayMap.set("Corey Graveline-Dumouchel", "Field")
-        }     
-      } 
+        }
+      }
     })
   }
 }
