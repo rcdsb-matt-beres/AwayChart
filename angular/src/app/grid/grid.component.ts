@@ -129,7 +129,11 @@ export class GridComponent implements OnInit {
           if (this.displayMap.get(event.summary.split("-")[0].trim()) == "Remote" || this.displayMap.get(event.summary.split("-")[0].trim()) == "Conference" || this.displayMap.get(event.summary.split("-")[0].trim()) == "Out of Office") {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
-          this.displayMap.set(event.summary.split("-")[0].trim(), "Field (" + event.summary.split("(")[1].trim());
+          if (event.summary.split("(")[1] != null) {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Field (" + event.summary.split("(")[1].trim());
+          } else {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Field")
+          }
         } //Account for Corey's hyphenated last name
         else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim().includes("Field")) {
           this.fieldMap.set("Corey Graveline-Dumouchel", "Field")
