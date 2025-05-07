@@ -8,8 +8,7 @@ import { CalendarService } from '../calendar.service';
   styleUrl: './add-event.component.css'
 })
 export class AddEventComponent {
-constructor(private calendarService: CalendarService) {}
   onClick() {
-    //Go to add event app
+    window.location.href = 'https://rcdsb-matt-beres.github.io/Add-Event-Website/';
   }
 }
