@@ -7,43 +7,51 @@
     margin-right: auto;
 }
 
-.name, .value {    
-  border: 1px solid black;
-  padding: 10px;
-  font-size: 28px;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: rgba(250,250,250, .8);
+.name,
+.value {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 28px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgba(250, 250, 250, .8);
 }
 
 .name {
-    background-color: rgba(241,241,241, .8);
+    background-color: rgba(241, 241, 241, .8);
 }
 
-.first-left {    
+.first-left {
     border-top-left-radius: 5px;
 }
 
-.first-right {    
+.first-right {
     border-top-right-radius: 5px;
 }
 
-.last-left {    
+.last-left {
     border-bottom-left-radius: 5px;
 }
 
-.last-right {    
+.last-right {
     border-bottom-right-radius: 5px;
 }
 
 .field {
     color: darkgreen;
 }
+
 .remote {
     color: darkblue;
 }
+
 .conference {
     color: darkgoldenrod;
 }
+
+.out-of-office {
+    color: darkorange;
+}
+
 .out {
     color: darkred;
 }

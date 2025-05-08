@@ -43,6 +43,7 @@ export class GridComponent implements OnInit {
   conferenceMap = new Map<String, String>();
   awayMap = new Map<String, String>();
   fieldMap = new Map<String, String>();
+  outMap = new Map<String, String>();
 
   displayMap = new Map<String, String>();
 
@@ -84,11 +85,15 @@ export class GridComponent implements OnInit {
         //Remote
         if (event.summary.split("-")[1].trim() == "Remote") {
           this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote")
-          this.displayMap.set(event.summary.split("-")[0].trim(), "Remote")
+          if (this.displayMap.get(event.summary.split("-")[0].trim()) != "Out" && !this.displayMap.get(event.summary.split("-")[0].trim())?.includes("Field") && this.displayMap.get(event.summary.split("-")[0].trim()) != "Out of Office" && this.displayMap.get(event.summary.split("-")[0].trim()) != "Conference") {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Remote")
+          }
         } //Account for Corey's hyphenated last name
         else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote") {
           this.remoteMap.set("Corey Graveline-Dumouchel", "Remote")
-          this.displayMap.set("Corey Graveline-Dumouchel", "Remote")
+          if (this.displayMap.get("Corey Graveline-Dumouchel") != "Out" && !this.displayMap.get("Corey Graveline-Dumouchel")?.includes("Field") && this.displayMap.get("Corey Graveline-Dumouchel") != "Out of Office" && this.displayMap.get("Corey Graveline-Dumouchel") != "Conference") {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Remote")
+          }
         }
 
         //Conference
@@ -97,14 +102,18 @@ export class GridComponent implements OnInit {
           if (this.displayMap.get(event.summary.split("-")[0].trim()) == "Remote") {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
-          this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
+          if (this.displayMap.get(event.summary.split("-")[0].trim()) != "Out" && !this.displayMap.get(event.summary.split("-")[0].trim())?.includes("Field") && this.displayMap.get(event.summary.split("-")[0].trim()) != "Out of Office") {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
+          }
         } //Account for Corey's hyphenated last name
         else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Conference") {
           this.conferenceMap.set("Corey Graveline-Dumouchel", "Conference");
           if (this.displayMap.get("Corey Graveline-Dumouchel") == "Remote") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
-          this.displayMap.set("Corey Graveline-Dumouchel", "Conference");
+          if (this.displayMap.get("Corey Graveline-Dumouchel") != "Out" && !this.displayMap.get("Corey Graveline-Dumouchel")?.includes("Field") && this.displayMap.get("Corey Graveline-Dumouchel") != "Out of Office") {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Conference");
+          }
         }
 
         //Out of Office
@@ -113,14 +122,18 @@ export class GridComponent implements OnInit {
           if (this.displayMap.get(event.summary.split("-")[0].trim()) == "Remote" || this.displayMap.get(event.summary.split("-")[0].trim()) == "Conference") {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
-          this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
+          if (this.displayMap.get(event.summary.split("-")[0].trim()) != "Out" && !this.displayMap.get(event.summary.split("-")[0].trim())?.includes("Field")) {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
+          }
         } //Account for Corey's hyphenated last name
         else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Out of Office") {
           this.awayMap.set("Corey Graveline-Dumouchel", "Out of Office")
           if (this.displayMap.get("Corey Graveline-Dumouchel") == "Remote" || this.displayMap.get("Corey Graveline-Dumouchel") == "Conference") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
-          this.displayMap.set("Corey Graveline-Dumouchel", "Out of Office")
+          if (this.displayMap.get("Corey Graveline-Dumouchel") != "Out" && !this.displayMap.get("Corey Graveline-Dumouchel")?.includes("Field")) {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Out of Office")
+          }
         }
 
         //Field
@@ -129,10 +142,12 @@ export class GridComponent implements OnInit {
           if (this.displayMap.get(event.summary.split("-")[0].trim()) == "Remote" || this.displayMap.get(event.summary.split("-")[0].trim()) == "Conference" || this.displayMap.get(event.summary.split("-")[0].trim()) == "Out of Office") {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
-          if (event.summary.split("(")[1] != null) {
-            this.displayMap.set(event.summary.split("-")[0].trim(), "Field (" + event.summary.split("(")[1].trim());
-          } else {
-            this.displayMap.set(event.summary.split("-")[0].trim(), "Field")
+          if (this.displayMap.get(event.summary.split("-")[0].trim()) != "Out") {
+            if (event.summary.split("(")[1] != null) {
+              this.displayMap.set(event.summary.split("-")[0].trim(), "Field (" + event.summary.split("(")[1].trim());
+            } else {
+              this.displayMap.set(event.summary.split("-")[0].trim(), "Field")
+            }
           }
         } //Account for Corey's hyphenated last name
         else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim().includes("Field")) {
@@ -140,9 +155,41 @@ export class GridComponent implements OnInit {
           if (this.displayMap.get("Corey Graveline-Dumouchel") == "Remote" || this.displayMap.get("Corey Graveline-Dumouchel") == "Conference" || this.displayMap.get("Corey Graveline-Dumouchel") == "Out of Office") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
-          this.displayMap.set("Corey Graveline-Dumouchel", "Field")
+          if (this.displayMap.get("Corey Graveline-Dumouchel") != "Out") {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Field")
+          }
+        }
+
+        //Out
+        if (event.summary.split("-")[1].trim() == "Out") {
+          this.outMap.set(event.summary.split("-")[0].trim(), "Out");
+          if (
+            this.displayMap.get(event.summary.split("-")[0].trim()) == "Remote" ||
+            this.displayMap.get(event.summary.split("-")[0].trim()) == "Conference" ||
+            this.displayMap.get(event.summary.split("-")[0].trim()) == "Out of Office" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.includes("Field")
+          ) {
+            this.displayMap.delete(event.summary.split("-")[0].trim());
+          }
+          this.displayMap.set(event.summary.split("-")[0].trim(), "Out");
+        } //Account for Corey's hyphenated last name
+        else if (
+          event.summary.split("-")[0].trim() == "Corey Graveline" &&
+          event.summary.split("-")[2].trim() == "Out"
+        ) {
+          this.outMap.set("Corey Graveline-Dumouchel", "Out");
+          if (
+            this.displayMap.get("Corey Graveline-Dumouchel") == "Remote" ||
+            this.displayMap.get("Corey Graveline-Dumouchel") == "Conference" ||
+            this.displayMap.get(event.summary.split("-")[0].trim()) == "Out of Office" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.includes("Field")
+          ) {
+            this.displayMap.delete("Corey Graveline-Dumouchel");
+          }
+          this.displayMap.set("Corey Graveline-Dumouchel", "Out");
         }
       }
+      console.log(this.displayMap)
     })
   }
 }
