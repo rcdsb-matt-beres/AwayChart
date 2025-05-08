@@ -7,7 +7,7 @@
         "."}}</span>
     </div>
     <div class="value" [ngClass]="displayMap.get(name) == 'Remote' ? 'remote' : 
-                                    fieldMap.get(name) ? 'field' : 
+                                    displayMap.get(name)?.includes('Field') ? 'field' : 
                                     displayMap.get(name) == 'Conference' ? 'conference' :
                                     displayMap.get(name) == 'Out of Office' ? 'out-of-office' : 
                                     displayMap.get(name) == 'Off' ? 'off' : ''"
