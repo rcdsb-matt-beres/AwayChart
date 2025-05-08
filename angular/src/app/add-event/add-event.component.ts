@@ -11,4 +11,8 @@ export class AddEventComponent {
   onClick() {
     window.location.href = 'https://rcdsb-matt-beres.github.io/Add-Event-Website/';
   }
+
+  onDelete() {
+    window.location.href = 'https://rcdsb-matt-beres.github.io/Delete-Event-Website/';
+  }
 }
