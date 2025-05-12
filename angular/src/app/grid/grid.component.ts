@@ -55,7 +55,7 @@ export class GridComponent implements OnInit {
       this.itemizeEvents();
     });
 
-    this.intervalSubscription = interval(300000).subscribe(_ => {
+    this.intervalSubscription = interval(60000).subscribe(_ => {
       this.remoteMap.clear();
       this.conferenceMap.clear();
       this.awayMap.clear();
