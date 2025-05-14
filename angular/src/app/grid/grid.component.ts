@@ -23,19 +23,23 @@ export class GridComponent implements OnInit {
     "Bethany McCulloch",
     "Brad Pilon",
     "Corey Graveline-Dumouchel",
+    "Chris Waito",
+    "Dan Schinkel",
     "David Priebe",
     "Dean Cybulski",
-    "Don White",
     "Gavin McGinley",
+    "Jacqueline Marquardt",
     "Josh Burton",
     "Justin Lepine",
     "Kathy Prescott",
     "Matt Beres",
     "Michelle Rowe",
     "Mitch Yackobeck",
+    "Natalie Blank Cazabon",
     "Sheri Larochelle",
     "Terri Lee",
     "Trevor Smith",
+    "Tyler Lloyd Gallan"
   ];
 
   events: any[] = [];
