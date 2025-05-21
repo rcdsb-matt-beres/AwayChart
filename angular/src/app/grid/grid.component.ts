@@ -48,6 +48,7 @@ export class GridComponent implements OnInit {
   awayMap = new Map<String, String>();
   fieldMap = new Map<String, String>();
   offMap = new Map<String, String>();
+  meetingMap = new Map<String, String>();
 
   displayMap = new Map<String, String>();
 
@@ -109,6 +110,42 @@ export class GridComponent implements OnInit {
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE"
           ) {
             this.displayMap.set("Corey Graveline-Dumouchel", "Remote");
+          }
+        }
+
+        //Meeting
+        if (event.summary.split("-")[1].trim().toUpperCase() == "MEETING") {
+          this.meetingMap.set(event.summary.split("-")[0].trim(), "Meeting");
+          if (
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE"
+          ) {
+            this.displayMap.delete(event.summary.split("-")[0].trim());
+          }
+          if (
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
+            !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
+          ) {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Meeting");
+          }
+        } else if (
+          event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
+          event.summary.split("-")[2].trim().toUpperCase() == "MEETING"
+        ) {
+          this.meetingMap.set("Corey Graveline-Dumouchel", "Meeting");
+          if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE"
+          ) {
+            this.displayMap.delete("Corey Graveline-Dumouchel");
+          }
+          if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
+            !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
+          ) {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Meeting");
           }
         }
 

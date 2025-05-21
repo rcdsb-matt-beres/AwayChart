@@ -9,6 +9,7 @@
     <div class="value" [ngClass]="displayMap.get(name) == 'Remote' ? 'remote' : 
                                     displayMap.get(name)?.includes('Field') ? 'field' : 
                                     displayMap.get(name) == 'Conference' ? 'conference' :
+                                    displayMap.get(name) == 'Meeting' ? 'meeting' :
                                     displayMap.get(name) == 'Out of Office' ? 'out-of-office' : 
                                     displayMap.get(name) == 'Off' ? 'off' : ''"
       [ngStyle]="names.indexOf(name) == 1 ? {'border-top-right-radius': '5px'} : names.indexOf(name) == names.length - 1 ? {'border-bottom-right-radius': '5px'} : null">
