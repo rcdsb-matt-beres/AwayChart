@@ -49,6 +49,7 @@ export class GridComponent implements OnInit {
   fieldMap = new Map<String, String>();
   offMap = new Map<String, String>();
   meetingMap = new Map<String, String>();
+  trainingMap = new Map<String, String>();
 
   displayMap = new Map<String, String>();
 
@@ -104,6 +105,8 @@ export class GridComponent implements OnInit {
         ) {
           this.remoteMap.set("Corey Graveline-Dumouchel", "Remote");
           if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "MEETING" &&
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
             !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE" &&
@@ -117,12 +120,13 @@ export class GridComponent implements OnInit {
         if (event.summary.split("-")[1].trim().toUpperCase() == "MEETING") {
           this.meetingMap.set(event.summary.split("-")[0].trim(), "Meeting");
           if (
-            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE"
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE"
           ) {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
           if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "CONFERENCE" &&
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
             !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
@@ -135,12 +139,13 @@ export class GridComponent implements OnInit {
         ) {
           this.meetingMap.set("Corey Graveline-Dumouchel", "Meeting");
           if (
-            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE"
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE"
           ) {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
           if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE" &&
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
             !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
@@ -149,10 +154,50 @@ export class GridComponent implements OnInit {
           }
         }
 
+        //Training
+        if (event.summary.split("-")[1].trim().toUpperCase() == "TRAINING") {
+          this.trainingMap.set(event.summary.split("-")[0].trim(), "Training");
+          if (
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING"
+          ) {
+            this.displayMap.delete(event.summary.split("-")[0].trim());
+          }
+          if (
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "CONFERENCE" &&
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
+            !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
+          ) {
+            this.displayMap.set(event.summary.split("-")[0].trim(), "Training");
+          }
+        } else if (
+          event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
+          event.summary.split("-")[2].trim().toUpperCase() == "TRAINING"
+        ) {
+          this.trainingMap.set("Corey Graveline-Dumouchel", "Training");
+          if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING"
+          ) {
+            this.displayMap.delete("Corey Graveline-Dumouchel");
+          }
+          if (
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE" &&
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
+            !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
+            this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
+          ) {
+            this.displayMap.set("Corey Graveline-Dumouchel", "Training");
+          }
+        }
+
         //Conference
         if (event.summary.split("-")[1].trim().toUpperCase() == "CONFERENCE") {
           this.conferenceMap.set(event.summary.split("-")[0].trim(), "Conference");
-          if (this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE") {
+          if (this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING") {
             this.displayMap.delete(event.summary.split("-")[0].trim());
           }
           if (
@@ -167,7 +212,9 @@ export class GridComponent implements OnInit {
           event.summary.split("-")[2].trim().toUpperCase() == "CONFERENCE"
         ) {
           this.conferenceMap.set("Corey Graveline-Dumouchel", "Conference");
-          if (this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE") {
+          if (this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING") {
             this.displayMap.delete("Corey Graveline-Dumouchel");
           }
           if (
@@ -184,6 +231,8 @@ export class GridComponent implements OnInit {
           this.awayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
           if (
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE"
           ) {
             this.displayMap.delete(event.summary.split("-")[0].trim());
@@ -201,6 +250,8 @@ export class GridComponent implements OnInit {
           this.awayMap.set("Corey Graveline-Dumouchel", "Out of Office");
           if (
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE"
           ) {
             this.displayMap.delete("Corey Graveline-Dumouchel");
@@ -218,6 +269,8 @@ export class GridComponent implements OnInit {
           this.fieldMap.set(event.summary.split("-")[0].trim(), "Field");
           if (
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "OUT OF OFFICE"
           ) {
@@ -240,6 +293,8 @@ export class GridComponent implements OnInit {
           this.fieldMap.set("Corey Graveline-Dumouchel", "Field");
           if (
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "OUT OF OFFICE"
           ) {
@@ -255,6 +310,8 @@ export class GridComponent implements OnInit {
           this.offMap.set(event.summary.split("-")[0].trim(), "Off");
           if (
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "OUT OF OFFICE" ||
             this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD")
@@ -269,6 +326,8 @@ export class GridComponent implements OnInit {
           this.offMap.set("Corey Graveline-Dumouchel", "Off");
           if (
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
+            this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "OUT OF OFFICE" ||
             this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD")
