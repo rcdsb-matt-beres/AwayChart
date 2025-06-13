@@ -12,12 +12,12 @@ import { AddEventComponent } from './add-event/add-event.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit{  
+export class AppComponent implements OnInit {
   checkDate = new Date();
   currMonth = this.checkDate.getMonth() + 1;
   currSeason = "";
 
-  constructor(private calendarService: CalendarService, private cdr: ChangeDetectorRef) {}
+  constructor(private calendarService: CalendarService, private cdr: ChangeDetectorRef) { }
   events: any[] = [];
   remoteMap = new Map<String, String>();
 
@@ -25,18 +25,7 @@ export class AppComponent implements OnInit{
     this.getSeason();
     this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
       this.events = response.items;
-      this.itemizeEvents();
     });
-  }
-
-  itemizeEvents() {
-    this.events.forEach(event => {
-      if (event.summary.split("-")[1].trim() == "Remote") {
-        this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote")
-      } else if (event.summary.split("-")[0].trim() == "Corey Graveline" && event.summary.split("-")[2].trim() == "Remote"){
-        this.remoteMap.set("Corey Graveline-Dumouchel", "Remote")
-      }
-    })
   }
 
   getSeason() {
