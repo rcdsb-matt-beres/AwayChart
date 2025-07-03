@@ -58,7 +58,10 @@ export class GridComponent implements OnInit {
 
     this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
       this.events = response.items;
-      this.itemizeEvents();
+      this.calendarService.getRemoteCalendarEvents().subscribe((resp: { items: any[]; }) => {
+        this.events = [...this.events, ...resp.items]
+        this.itemizeEvents();
+      })
     });
 
     this.intervalSubscription = interval(60000).subscribe(_ => {
@@ -69,7 +72,10 @@ export class GridComponent implements OnInit {
       this.displayMap.clear();
       this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
         this.events = response.items;
-        this.itemizeEvents();
+        this.calendarService.getRemoteCalendarEvents().subscribe((resp: { items: any[]; }) => {
+          this.events = [...this.events, ...resp.items]
+          this.itemizeEvents();
+        })
       });
     });
   }
