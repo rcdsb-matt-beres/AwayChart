@@ -2,8 +2,9 @@
   <ng-container *ngFor="let name of names">
     <div class="name"
       [ngClass]="names.indexOf(name) == 0 ? 'first-left' : names.indexOf(name) == names.length - 2 ? 'last-left' : ''">
-      <span *ngIf="name.split(' ')[0] != 'Andrew'">{{name.split(" ")[0]}}</span>
-      <span *ngIf="name.split(' ')[0] == 'Andrew'">{{name.split(" ")[0] + " " + name.split(" ")[1].substring(0,1) +
+      <span *ngIf="name.split(' ')[0] != 'Andrew' && name.split(' ')[0] != 'Josh'">{{name.split(" ")[0]}}</span>
+      <span *ngIf="name.split(' ')[0] == 'Andrew' || name.split(' ')[0] == 'Josh'">{{name.split(" ")[0] + " " +
+        name.split(" ")[1].substring(0,1) +
         "."}}</span>
     </div>
     <div class="value" [ngClass]="displayMap.get(name) == 'Remote' ? 'remote' : 

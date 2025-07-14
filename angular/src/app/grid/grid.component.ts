@@ -28,8 +28,8 @@ export class GridComponent implements OnInit {
     "David Priebe",
     "Dean Cybulski",
     "Gavin McGinley",
-    "Jacqueline Marquardt",
     "Josh Burton",
+    "Josh Yourth",
     "Justin Lepine",
     "Kathy Prescott",
     "Matt Beres",
@@ -95,7 +95,7 @@ export class GridComponent implements OnInit {
 
       if (shouldDisplay) {
         //Check for unscheduled/scheduled event, set to "Off"
-        if (event.summary.split("-").length < 2) {
+        if (event.summary.split("-").length < 2 || event.summary.split("-").length > 2) {
           if (event.summary.toUpperCase().split("UNSCHEDULED").length > 1) {
             let name = this.grabName(event.summary.toUpperCase().split("UNSCHEDULED")[0].trim());
             if (
@@ -380,6 +380,10 @@ export class GridComponent implements OnInit {
   }
 
   grabName(name: string): string {
+    if (name.includes("COREY GRAVELINE-DUMOUCHEL")) {
+      return "Corey Graveline-Dumouchel";
+    }
+
     let resp: string = "";
     this.names.forEach((n) => {
       if (n.toUpperCase() == name) {
