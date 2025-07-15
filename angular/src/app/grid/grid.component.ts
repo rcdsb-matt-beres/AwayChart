@@ -382,8 +382,11 @@ export class GridComponent implements OnInit {
   grabName(name: string): string {
     if (name.includes("COREY GRAVELINE-DUMOUCHEL")) {
       return "Corey Graveline-Dumouchel";
+    } else if (name.includes("TYLER LLOYD-GALLAN")) {
+      return "Tyler Lloyd Gallan";
+    } else if (name.includes("NATALIE BLANK-CAZABON")) {
+      return "Natalie Blank Cazabon";
     }
-
     let resp: string = "";
     this.names.forEach((n) => {
       if (n.toUpperCase() == name) {
