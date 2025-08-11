@@ -124,6 +124,32 @@ export class GridComponent implements OnInit {
             }
             this.displayMap.set(name, "Off");
             this.offMap.set(name, "Off");
+          } else {
+            let name = this.grabName((event.summary.split("-")[0] + "-" + event.summary.split("-")[1].trim()).toUpperCase());
+            if (
+              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
+              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
+              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
+              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
+              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
+              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
+            ) {
+              this.displayMap.delete(name);
+            }
+            this.displayMap.set(name, "Off");
+            this.offMap.set(name, "Off");
+            if (
+              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
+              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
+              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
+              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
+              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
+              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
+            ) {
+              this.displayMap.delete(name);
+            }
+            this.displayMap.set(name, "Off");
+            this.offMap.set(name, "Off");
           }
         } else {
           //Remote
