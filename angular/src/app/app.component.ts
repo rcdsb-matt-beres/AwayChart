@@ -18,14 +18,10 @@ export class AppComponent implements OnInit {
   currSeason = "";
 
   constructor(private calendarService: CalendarService, private cdr: ChangeDetectorRef) { }
-  events: any[] = [];
   remoteMap = new Map<String, String>();
 
   ngOnInit(): void {
     this.getSeason();
-    this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
-      this.events = response.items;
-    });
   }
 
   getSeason() {

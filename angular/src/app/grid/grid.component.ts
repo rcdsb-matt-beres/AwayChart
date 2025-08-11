@@ -13,6 +13,9 @@ export class GridComponent implements OnInit {
   constructor(private calendarService: CalendarService) { }
   private intervalSubscription?: Subscription;
 
+  // If someone has a hyphenated name, we need to account for that (so greedy, who needs 2 names)
+  // Add the full name to this list of names with spaces instead of hyphens
+  // Then add it to grabName() and hyphenatedName()
   names = [
     "Aaron McQuade",
     "Alex Fudge",
@@ -22,7 +25,7 @@ export class GridComponent implements OnInit {
     "Anthony Walsh",
     "Bethany McCulloch",
     "Brad Pilon",
-    "Corey Graveline-Dumouchel",
+    "Corey Graveline Dumouchel",
     "Chris Waito",
     "Dan Schinkel",
     "David Priebe",
@@ -37,7 +40,7 @@ export class GridComponent implements OnInit {
     "Mitch Yackobeck",
     "Natalie Blank Cazabon",
     "Sheri Larochelle",
-    "Terri Lee",
+    "Terri Lyn Lee",
     "Trevor Smith",
     "Tyler Lloyd Gallan"
   ];
@@ -109,8 +112,16 @@ export class GridComponent implements OnInit {
       }
 
       if (shouldDisplay) {
+        if (this.hyphenatedName(event.summary.toUpperCase())) {
+          //if 2 hyphens
+          if (event.summary.split("-").length > 2) {
+            event.summary = this.grabName(event.summary.toUpperCase()) + " - " + event.summary.split("-")[2].trim();
+          } else { //if 1 hyphen (only the name one)
+            event.summary = this.grabName(event.summary.toUpperCase()) + " - " + event.summary.substring(this.grabName(event.summary.toUpperCase()).length + 1).trim();
+          }
+        }
         //Check for unscheduled/scheduled events from "IT Dept Staff" calendar, set to "Off"
-        if (event.summary.split("-").length < 2 || (event.summary.split("-").length > 2 && !event.summary.toUpperCase().includes("COREY GRAVELINE-DUMOUCHEL"))) {
+        if (event.summary.split("-").length < 2) {
           if (event.summary.toUpperCase().split("UNSCHEDULED").length > 1) {
             let name = this.grabName(event.summary.toUpperCase().split("UNSCHEDULED")[0].trim());
             //Check for lower priority items that should be removed
@@ -125,26 +136,13 @@ export class GridComponent implements OnInit {
               this.displayMap.delete(name);
             }
             this.displayMap.set(name, "Off");
-          } else { //This clause catches Corey Graveline-Dumouchel - Off
-            let name = this.grabName((event.summary.split("-")[0] + "-" + event.summary.split("-")[1].trim()).toUpperCase());
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForOff(name)) {
-              this.displayMap.delete(name);
-            }
-            this.displayMap.set(name, "Off");
           }
         } else {
           //Remote
           if (event.summary.split("-")[1].trim().toUpperCase() == "REMOTE") {
+            //Check for higher priority items that overule
             if (this.checkIfDisplayRemote(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Remote");
-            }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "REMOTE"
-          ) {
-            if (this.checkIfDisplayRemote(("Corey Graveline-Dumouchel").toUpperCase())) {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Remote");
             }
           }
 
@@ -154,20 +152,9 @@ export class GridComponent implements OnInit {
             if (this.checkToRemoveForMeeting(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
+            //Check for higher priority items that overule
             if (this.checkIfDisplayMeeting(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Meeting");
-            }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "MEETING"
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForMeeting("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            if (
-              this.checkIfDisplayMeeting("Corey Graveline-Dumouchel")) {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Meeting");
             }
           }
 
@@ -177,19 +164,9 @@ export class GridComponent implements OnInit {
             if (this.checkToRemoveForTraining(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
+            //Check for higher priority items that overule
             if (this.checkIfDisplayTraining(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Training");
-            }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "TRAINING"
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForTraining("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            if (this.checkIfDisplayTraining("Corey Graveline-Dumouchel")) {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Training");
             }
           }
 
@@ -199,19 +176,9 @@ export class GridComponent implements OnInit {
             if (this.checkToRemoveForConference(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
+            //Check for higher priority items that overule
             if (this.checkIfDisplayConference(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
-            }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "CONFERENCE"
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForConference("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            if (this.checkIfDisplayConference("Corey Graveline-Dumouchel")) {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Conference");
             }
           }
 
@@ -221,19 +188,9 @@ export class GridComponent implements OnInit {
             if (this.checkToRemoveForOutOfOffice(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
+            //Check for higher priority items that overule
             if (this.checkIfDisplayOutOfOffice(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
-            }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "OUT OF OFFICE"
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForOutOfOffice("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            if (this.checkIfDisplayOutOfOffice("Corey Graveline-Dumouchel")) {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Out of Office");
             }
           }
 
@@ -243,6 +200,7 @@ export class GridComponent implements OnInit {
             if (this.checkToRemoveForField(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
+            //Check for higher priority items that overule
             if (this.checkIfDisplayField(event.summary.split("-")[0].trim())) {
               //Account for school codes
               if (event.summary.split("(")[1] != null) {
@@ -254,21 +212,6 @@ export class GridComponent implements OnInit {
                 this.displayMap.set(event.summary.split("-")[0].trim(), "Field");
               }
             }
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase().includes("FIELD")
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForField("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            if (this.checkIfDisplayField("Corey Graveline-Dumouchel")) {
-              if (event.summary.split("-")[2].trim().split("(")[1] != null) {
-                this.displayMap.set("Corey Graveline-Dumouchel", "Field (" + event.summary.split("-")[2].trim().split("(")[1].trim());
-              } else { //If no school codes, just set to "Field"
-                this.displayMap.set("Corey Graveline-Dumouchel", "Field");
-              }
-            }
           }
 
           //Off
@@ -278,29 +221,31 @@ export class GridComponent implements OnInit {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
             this.displayMap.set(event.summary.split("-")[0].trim(), "Off");
-          } else if ( //Account for Corey's hyphenated name
-            event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
-            event.summary.split("-")[2].trim().toUpperCase() == "OFF"
-          ) {
-            //Check for lower priority items that should be removed
-            if (this.checkToRemoveForOff("Corey Graveline-Dumouchel")) {
-              this.displayMap.delete("Corey Graveline-Dumouchel");
-            }
-            this.displayMap.set("Corey Graveline-Dumouchel", "Off");
           }
         }
       }
     })
   }
 
+  //Check if the name is hyphenated
+  hyphenatedName(name: string): boolean {
+    if (name.includes("COREY GRAVELINE-DUMOUCHEL") || name.includes("TYLER LLOYD-GALLAN") || name.includes("NATALIE BLANK-CAZABON") || name.includes("TERRI-LYN LEE")) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   //This function is meant to account for people with hyphenated names from "IT Dept Staff" calendar
   grabName(name: string): string {
     if (name.includes("COREY GRAVELINE-DUMOUCHEL")) {
-      return "Corey Graveline-Dumouchel";
+      return "Corey Graveline Dumouchel";
     } else if (name.includes("TYLER LLOYD-GALLAN")) {
       return "Tyler Lloyd Gallan";
     } else if (name.includes("NATALIE BLANK-CAZABON")) {
       return "Natalie Blank Cazabon";
+    } else if (name.includes("TERRI-LYN LEE")) {
+      return "Terri Lyn Lee";
     }
     let resp: string = "";
     this.names.forEach((n) => {
