@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CalendarService } from '../calendar.service';
 import { CommonModule, NgFor } from '@angular/common';
-import { interval, map, Subscription } from 'rxjs';
+import { interval, map, Subscription, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-grid',
@@ -43,43 +43,58 @@ export class GridComponent implements OnInit {
   ];
 
   events: any[] = [];
-  remoteMap = new Map<String, String>();
-  conferenceMap = new Map<String, String>();
-  awayMap = new Map<String, String>();
-  fieldMap = new Map<String, String>();
-  offMap = new Map<String, String>();
-  meetingMap = new Map<String, String>();
-  trainingMap = new Map<String, String>();
-
   displayMap = new Map<String, String>();
 
   ngOnInit(): void {
     this.names.sort();
 
-    this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
-      this.events = response.items;
-      this.calendarService.getRemoteCalendarEvents().subscribe((resp: { items: any[]; }) => {
-        this.events = [...this.events, ...resp.items]
-        this.itemizeEvents();
-      })
-    });
-
-    this.intervalSubscription = interval(60000).subscribe(_ => {
-      this.remoteMap.clear();
-      this.conferenceMap.clear();
-      this.awayMap.clear();
-      this.fieldMap.clear();
-      this.displayMap.clear();
-      this.calendarService.getEvents().subscribe((response: { items: any[]; }) => {
-        this.events = response.items;
-        this.calendarService.getRemoteCalendarEvents().subscribe((resp: { items: any[]; }) => {
-          this.events = [...this.events, ...resp.items]
-          this.itemizeEvents();
+    // Grab events from both calendars on load
+    this.calendarService.getEvents()
+      .pipe(
+        switchMap((response: { items: any[]; }) => {
+          this.events = response.items;
+          return this.calendarService.getRemoteCalendarEvents();
         })
+      )
+      .subscribe((resp: { items: any[]; }) => {
+        this.events = [...this.events, ...resp.items];
+        this.itemizeEvents();
       });
-    });
+
+    // Refresh chart every minute
+    this.intervalSubscription = interval(60000)
+      .pipe(
+        switchMap(_ => {
+          this.displayMap.clear();
+          return this.calendarService.getEvents();
+        }),
+        switchMap((response: { items: any[]; }) => {
+          this.events = response.items;
+          return this.calendarService.getRemoteCalendarEvents();
+        })
+      )
+      .subscribe((resp: { items: any[]; }) => {
+        this.events = [...this.events, ...resp.items];
+        this.itemizeEvents();
+      });
   }
 
+  ngOnDestroy(): void {
+    if (this.intervalSubscription) {
+      this.intervalSubscription.unsubscribe();
+    }
+  }
+
+  //The event heirarchy is as follows:
+  //Remote
+  //Meeting
+  //Training
+  //Conference
+  //Out of Office
+  //Field
+  //Off
+
+  //This function will take the events from the calendar and itemize them into the displayMap
   itemizeEvents() {
     this.events.forEach(event => {
       //Check timing
@@ -94,308 +109,181 @@ export class GridComponent implements OnInit {
       }
 
       if (shouldDisplay) {
-        //Check for unscheduled/scheduled event, set to "Off"
-        if (event.summary.split("-").length < 2 || event.summary.split("-").length > 2) {
+        //Check for unscheduled/scheduled events from "IT Dept Staff" calendar, set to "Off"
+        if (event.summary.split("-").length < 2 || (event.summary.split("-").length > 2 && !event.summary.toUpperCase().includes("COREY GRAVELINE-DUMOUCHEL"))) {
           if (event.summary.toUpperCase().split("UNSCHEDULED").length > 1) {
             let name = this.grabName(event.summary.toUpperCase().split("UNSCHEDULED")[0].trim());
-            if (
-              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOff(name)) {
               this.displayMap.delete(name);
             }
             this.displayMap.set(name, "Off");
-            this.offMap.set(name, "Off");
           } else if (event.summary.toUpperCase().split("SCHEDULED").length > 1) {
             let name = this.grabName(event.summary.toUpperCase().split("SCHEDULED")[0].trim());
-            if (
-              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOff(name)) {
               this.displayMap.delete(name);
             }
             this.displayMap.set(name, "Off");
-            this.offMap.set(name, "Off");
-          } else {
+          } else { //This clause catches Corey Graveline-Dumouchel - Off
             let name = this.grabName((event.summary.split("-")[0] + "-" + event.summary.split("-")[1].trim()).toUpperCase());
-            if (
-              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOff(name)) {
               this.displayMap.delete(name);
             }
             this.displayMap.set(name, "Off");
-            this.offMap.set(name, "Off");
-            if (
-              this.displayMap.get(name)?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(name)?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(name)?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(name)?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(name)?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get(name)?.toUpperCase().includes("FIELD")
-            ) {
-              this.displayMap.delete(name);
-            }
-            this.displayMap.set(name, "Off");
-            this.offMap.set(name, "Off");
           }
         } else {
           //Remote
           if (event.summary.split("-")[1].trim().toUpperCase() == "REMOTE") {
-            this.remoteMap.set(event.summary.split("-")[0].trim(), "Remote");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
-              !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE" &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "CONFERENCE"
-            ) {
+            if (this.checkIfDisplayRemote(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Remote");
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "REMOTE"
           ) {
-            this.remoteMap.set("Corey Graveline-Dumouchel", "Remote");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "MEETING" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
-              !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE"
-            ) {
+            if (this.checkIfDisplayRemote(("Corey Graveline-Dumouchel").toUpperCase())) {
               this.displayMap.set("Corey Graveline-Dumouchel", "Remote");
             }
           }
 
           //Meeting
           if (event.summary.split("-")[1].trim().toUpperCase() == "MEETING") {
-            this.meetingMap.set(event.summary.split("-")[0].trim(), "Meeting");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForMeeting(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "CONFERENCE" &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
-              !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+            if (this.checkIfDisplayMeeting(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Meeting");
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "MEETING"
           ) {
-            this.meetingMap.set("Corey Graveline-Dumouchel", "Meeting");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForMeeting("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
             if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "TRAINING" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
-              !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+              this.checkIfDisplayMeeting("Corey Graveline-Dumouchel")) {
               this.displayMap.set("Corey Graveline-Dumouchel", "Meeting");
             }
           }
 
           //Training
           if (event.summary.split("-")[1].trim().toUpperCase() == "TRAINING") {
-            this.trainingMap.set(event.summary.split("-")[0].trim(), "Training");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForTraining(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "CONFERENCE" &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
-              !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+            if (this.checkIfDisplayTraining(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Training");
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "TRAINING"
           ) {
-            this.trainingMap.set("Corey Graveline-Dumouchel", "Training");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForTraining("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "CONFERENCE" &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
-              !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+            if (this.checkIfDisplayTraining("Corey Graveline-Dumouchel")) {
               this.displayMap.set("Corey Graveline-Dumouchel", "Training");
             }
           }
 
           //Conference
           if (event.summary.split("-")[1].trim().toUpperCase() == "CONFERENCE") {
-            this.conferenceMap.set(event.summary.split("-")[0].trim(), "Conference");
-            if (this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING") {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForConference(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
-              !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+            if (this.checkIfDisplayConference(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "CONFERENCE"
           ) {
-            this.conferenceMap.set("Corey Graveline-Dumouchel", "Conference");
-            if (this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING") {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForConference("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
-              !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD") &&
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OUT OF OFFICE"
-            ) {
+            if (this.checkIfDisplayConference("Corey Graveline-Dumouchel")) {
               this.displayMap.set("Corey Graveline-Dumouchel", "Conference");
             }
           }
 
           //Out of Office
           if (event.summary.split("-")[1].trim().toUpperCase() == "OUT OF OFFICE") {
-            this.awayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOutOfOffice(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF" &&
-              !this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD")
-            ) {
+            if (this.checkIfDisplayOutOfOffice(event.summary.split("-")[0].trim())) {
               this.displayMap.set(event.summary.split("-")[0].trim(), "Out of Office");
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "OUT OF OFFICE"
           ) {
-            this.awayMap.set("Corey Graveline-Dumouchel", "Out of Office");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOutOfOffice("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF" &&
-              !this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD")
-            ) {
+            if (this.checkIfDisplayOutOfOffice("Corey Graveline-Dumouchel")) {
               this.displayMap.set("Corey Graveline-Dumouchel", "Out of Office");
             }
           }
 
           //Field
           if (event.summary.split("-")[1].trim().toUpperCase().includes("FIELD")) {
-            this.fieldMap.set(event.summary.split("-")[0].trim(), "Field");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "OUT OF OFFICE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForField(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
-            if (this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() != "OFF") {
+            if (this.checkIfDisplayField(event.summary.split("-")[0].trim())) {
+              //Account for school codes
               if (event.summary.split("(")[1] != null) {
                 this.displayMap.set(
                   event.summary.split("-")[0].trim(),
                   "Field (" + event.summary.split("(")[1].trim()
                 );
-              } else {
+              } else { //If no school codes, just set to "Field"
                 this.displayMap.set(event.summary.split("-")[0].trim(), "Field");
               }
             }
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase().includes("FIELD")
           ) {
-            this.fieldMap.set("Corey Graveline-Dumouchel", "Field");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "OUT OF OFFICE"
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForField("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
-            if (this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() != "OFF") {
-              this.displayMap.set("Corey Graveline-Dumouchel", "Field");
+            if (this.checkIfDisplayField("Corey Graveline-Dumouchel")) {
+              if (event.summary.split("-")[2].trim().split("(")[1] != null) {
+                this.displayMap.set("Corey Graveline-Dumouchel", "Field (" + event.summary.split("-")[2].trim().split("(")[1].trim());
+              } else { //If no school codes, just set to "Field"
+                this.displayMap.set("Corey Graveline-Dumouchel", "Field");
+              }
             }
           }
 
           //Off
           if (event.summary.split("-")[1].trim().toUpperCase() == "OFF" || event.summary.split("-")[1].trim().toUpperCase().includes("SCHEDULE")) {
-            this.offMap.set(event.summary.split("-")[0].trim(), "Off");
-            if (
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase().includes("FIELD")
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOff(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
             this.displayMap.set(event.summary.split("-")[0].trim(), "Off");
-          } else if (
+          } else if ( //Account for Corey's hyphenated name
             event.summary.split("-")[0].trim().toUpperCase() == "COREY GRAVELINE" &&
             event.summary.split("-")[2].trim().toUpperCase() == "OFF"
           ) {
-            this.offMap.set("Corey Graveline-Dumouchel", "Off");
-            if (
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "REMOTE" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "MEETING" ||
-              this.displayMap.get(event.summary.split("-")[0].trim())?.toUpperCase() == "TRAINING" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "CONFERENCE" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase() == "OUT OF OFFICE" ||
-              this.displayMap.get("Corey Graveline-Dumouchel")?.toUpperCase().includes("FIELD")
-            ) {
+            //Check for lower priority items that should be removed
+            if (this.checkToRemoveForOff("Corey Graveline-Dumouchel")) {
               this.displayMap.delete("Corey Graveline-Dumouchel");
             }
             this.displayMap.set("Corey Graveline-Dumouchel", "Off");
@@ -405,6 +293,7 @@ export class GridComponent implements OnInit {
     })
   }
 
+  //This function is meant to account for people with hyphenated names from "IT Dept Staff" calendar
   grabName(name: string): string {
     if (name.includes("COREY GRAVELINE-DUMOUCHEL")) {
       return "Corey Graveline-Dumouchel";
@@ -420,5 +309,175 @@ export class GridComponent implements OnInit {
       }
     })
     return resp;
+  }
+
+  //Check if the remote item is superseded by a higher priority item
+  checkIfDisplayRemote(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "MEETING" &&
+      this.displayMap.get(summary)?.toUpperCase() != "TRAINING" &&
+      this.displayMap.get(summary)?.toUpperCase() != "OFF" &&
+      !(this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD")) &&
+      this.displayMap.get(summary)?.toUpperCase() != "OUT OF OFFICE" &&
+      this.displayMap.get(summary)?.toUpperCase() != "CONFERENCE"
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //No need to check to remove for remote, since it is the lowest priority item
+
+  //Check if the meeting item is superseded by a higher priority item
+  checkIfDisplayMeeting(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "TRAINING" &&
+      this.displayMap.get(summary)?.toUpperCase() != "OFF" &&
+      !(this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD")) &&
+      this.displayMap.get(summary)?.toUpperCase() != "OUT OF OFFICE" &&
+      this.displayMap.get(summary)?.toUpperCase() != "CONFERENCE"
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //If remote item exists, delete it since it is superceded by a meeting item
+  checkToRemoveForMeeting(summary: string): boolean {
+    if (this.displayMap.get(summary)?.toUpperCase() == "REMOTE") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //Check if the training item is superseded by a higher priority item
+  checkIfDisplayTraining(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "OFF" &&
+      !(this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD")) &&
+      this.displayMap.get(summary)?.toUpperCase() != "OUT OF OFFICE" &&
+      this.displayMap.get(summary)?.toUpperCase() != "CONFERENCE"
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //If remote/meeting item exists, delete it since it is superceded by a training item
+  checkToRemoveForTraining(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() == "REMOTE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "MEETING"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //Check if the conference item is superseded by a higher priority item
+  checkIfDisplayConference(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "OFF" &&
+      !(this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD")) &&
+      this.displayMap.get(summary)?.toUpperCase() != "OUT OF OFFICE"
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //If remote/meeting/training item exists, delete it since it is superceded by a conference item
+  checkToRemoveForConference(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() == "REMOTE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "MEETING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "TRAINING"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //Check if the out of office item is superseded by a higher priority item
+  checkIfDisplayOutOfOffice(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "OFF" &&
+      !(this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD"))
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //If remote/meeting/training/conference item exists, delete it since it is superceded by an out of office item
+  checkToRemoveForOutOfOffice(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() == "REMOTE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "MEETING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "TRAINING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "CONFERENCE"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //Check if the field item is superseded by a higher priority item
+  checkIfDisplayField(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() != "OFF"
+    ) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //If remote/meeting/training/conference/out of office item exists, delete it since it is superceded by a field item
+  checkToRemoveForField(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() == "REMOTE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "MEETING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "TRAINING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "CONFERENCE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "OUT OF OFFICE"
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //No need to check if the off item is superseded by a higher priority item, since it is the highest priority
+
+  //If remote/meeting/training/conference/out of office/field item exists, delete it since it is superceded by an off item
+  checkToRemoveForOff(summary: string): boolean {
+    if (
+      this.displayMap.get(summary)?.toUpperCase() == "REMOTE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "MEETING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "TRAINING" ||
+      this.displayMap.get(summary)?.toUpperCase() == "CONFERENCE" ||
+      this.displayMap.get(summary)?.toUpperCase() == "OUT OF OFFICE" ||
+      (this.displayMap.get(summary) && this.displayMap.get(summary)!?.toUpperCase().includes("FIELD"))
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
