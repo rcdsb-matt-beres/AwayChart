@@ -31,7 +31,6 @@ export class GridComponent implements OnInit {
     "David Priebe",
     "Dean Cybulski",
     "Gavin McGinley",
-    "Josh Burton",
     "Josh Yourth",
     "Justin Lepine",
     "Kathy Prescott",
@@ -42,14 +41,15 @@ export class GridComponent implements OnInit {
     "Sheri Larochelle",
     "Terri Lyn Lee",
     "Trevor Smith",
-    "Tyler Lloyd Gallan"
+    "Tyler Lloyd Gallan",
+    ""
   ];
 
   events: any[] = [];
   displayMap = new Map<String, String>();
 
   ngOnInit(): void {
-    this.names.sort();
+    // this.names.sort();
 
     // Grab events from both calendars on load
     this.calendarService.getEvents()
@@ -120,7 +120,7 @@ export class GridComponent implements OnInit {
             event.summary = this.grabName(event.summary.toUpperCase()) + " - " + event.summary.substring(this.grabName(event.summary.toUpperCase()).length + 1).trim();
           }
         }
-        //Check for unscheduled/scheduled events from "IT Dept Staff" calendar, set to "Off"
+        //Check for unscheduled/scheduled events (with no hyphen) from "IT Dept Staff" calendar, set to "Off"
         if (event.summary.split("-").length < 2) {
           if (event.summary.toUpperCase().split("UNSCHEDULED").length > 1) {
             let name = this.grabName(event.summary.toUpperCase().split("UNSCHEDULED")[0].trim());
@@ -237,6 +237,7 @@ export class GridComponent implements OnInit {
   }
 
   //This function is meant to account for people with hyphenated names from "IT Dept Staff" calendar
+  //Make sure returned name is same length as parameter name
   grabName(name: string): string {
     if (name.includes("COREY GRAVELINE-DUMOUCHEL")) {
       return "Corey Graveline Dumouchel";
