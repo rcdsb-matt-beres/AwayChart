@@ -171,14 +171,19 @@ export class GridComponent implements OnInit {
           }
 
           //Conference
-          if (event.summary.split("-")[1].trim().toUpperCase() == "CONFERENCE") {
+          if (event.summary.split("-")[1].trim().toUpperCase() == "CONFERENCE" || event.summary.split("-")[1].trim().toUpperCase() == "VIRTUAL CONFERENCE") {
             //Check for lower priority items that should be removed
             if (this.checkToRemoveForConference(event.summary.split("-")[0].trim())) {
               this.displayMap.delete(event.summary.split("-")[0].trim());
             }
             //Check for higher priority items that overule
             if (this.checkIfDisplayConference(event.summary.split("-")[0].trim())) {
-              this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
+              //Differentiate between virtual and in-person conferences
+              if (event.summary.split("-")[1].trim().toUpperCase() == "VIRTUAL CONFERENCE") {
+                this.displayMap.set(event.summary.split("-")[0].trim(), "Virtual Conference");
+              } else {
+                this.displayMap.set(event.summary.split("-")[0].trim(), "Conference");
+              }
             }
           }
 
