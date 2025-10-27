@@ -1,4 +1,5 @@
-<body [ngClass]="currSeason == 'Winter' ? 'winter' : currSeason == 'Spring' ? 'spring' : currSeason == 'Summer' ? 'summer' : 'fall'">
+<body
+    [ngClass]="currSeason == 'Winter' ? 'winter' : currSeason == 'Spring' ? 'spring' : currSeason == 'Summer' ? 'summer' : currSeason == 'Halloween' ? 'halloween' : 'fall'">
     <app-clock></app-clock>
     <app-grid></app-grid>
     <app-add-event></app-add-event>
