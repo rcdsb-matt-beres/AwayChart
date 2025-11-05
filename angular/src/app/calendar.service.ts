@@ -14,19 +14,10 @@ export class CalendarService {
   private remoteCalendarId = 'c_a45d8e966d0c7524b6f84ea21df86b3d87f3575b107347c56451886b52f8a83a@group.calendar.google.com';
   private apiUrl = 'https://www.googleapis.com/calendar/v3/calendars';
 
-  today = new Date();
-  tomorrow!: Date;
-  start!: string;
-  end!: string;
+  start = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T00:00:00-05:00'
+  end = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T23:59:00-05:00'
 
-  constructor(private http: HttpClient) {
-    //For some reason after the Google Calendar API changes of Nov 2025 I have to pull events for tomorrow instead of today in order for it to work properly
-    this.tomorrow = new Date(this.today);
-    this.tomorrow.setDate(this.today.getDate() + 1);
-
-    this.start = formatDate(this.tomorrow, 'yyyy-MM-dd', 'en-US') + 'T00:00:00-04:00';
-    this.end = formatDate(this.tomorrow, 'yyyy-MM-dd', 'en-US') + 'T23:59:00-04:00';
-  }
+  constructor(private http: HttpClient) { }
 
   //Gets events from the "IT Dept Staff" calendar
   getEvents(): Observable<any> {
