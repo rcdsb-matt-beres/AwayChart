@@ -28,7 +28,11 @@ export class AppComponent implements OnInit {
     if (this.currMonth == 12) {
       this.currSeason = "Christmas";
     } else if (this.currMonth <= 2) {
-      this.currSeason = "Winter"
+      if (this.currMonth == 2 && this.checkDate.getDate() <= 14) {
+        this.currSeason = "Valentines"
+      } else {
+        this.currSeason = "Winter"
+      }
     } else if (this.currMonth >= 3 && this.currMonth <= 5) {
       this.currSeason = "Spring"
     } else if (this.currMonth >= 6 && this.currMonth <= 8) {
