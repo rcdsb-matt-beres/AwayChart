@@ -33,7 +33,8 @@ export class CalendarService {
     const params = new HttpParams()
       .set('key', this.apiKey)
       .set('timeMin', this.start)
-      .set('timeMax', this.end);
+      .set('timeMax', this.end)
+      .set('singleEvents', 'true');
 
     return this.http.get(
       `${this.apiUrl}/${this.staffCalendarId}/events`,
@@ -46,7 +47,8 @@ export class CalendarService {
     const params = new HttpParams()
       .set('key', this.apiKey)
       .set('timeMin', this.start)
-      .set('timeMax', this.end);
+      .set('timeMax', this.end)
+      .set('singleEvents', 'true');
 
     return this.http.get(
       `${this.apiUrl}/${this.remoteCalendarId}/events`,
