@@ -18,14 +18,15 @@ export class CalendarService {
   end;
 
   constructor(private http: HttpClient) {
-    let dstOffset = new Date().getTimezoneOffset();
-    if (dstOffset < 240) { // If in Daylight Saving Time
-      this.start = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T00:00:00-04:00';
-      this.end = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T23:59:00-04:00';
-    } else {
-      this.start = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T00:00:00-05:00';
-      this.end = formatDate(new Date(), 'yyyy-MM-dd', 'en-US') + 'T23:59:00-05:00';
-    }
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+
+    // Convert to ISO strings (ending in 'Z' for UTC)
+    this.start = startDate.toISOString();
+    this.end = endDate.toISOString();
   }
 
   //Gets events from the "IT Dept Staff" calendar
