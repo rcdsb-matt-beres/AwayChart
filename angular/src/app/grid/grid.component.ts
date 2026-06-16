@@ -31,6 +31,7 @@ export class GridComponent implements OnInit {
     "David Priebe",
     "Dean Cybulski",
     "Gavin McGinley",
+    "Josh Burton",
     "Josh Yourth",
     "Justin Lepine",
     "Kathy Prescott",
@@ -42,14 +43,14 @@ export class GridComponent implements OnInit {
     "Terri Lyn Lee",
     "Trevor Smith",
     "Tyler Lloyd Gallan",
-    "" // This is here for when theres an odd number of names
+    // "" // This is here for when theres an odd number of names
   ];
 
   events: any[] = [];
   displayMap = new Map<String, String>();
 
   ngOnInit(): void {
-    // this.names.sort(); // This is here for when theres an even number of names, it just makes sure it's alphabetical
+    this.names.sort(); // This is here for when theres an even number of names, it just makes sure it's alphabetical
 
     // Grab events from both calendars on load
     this.calendarService.getEvents()
